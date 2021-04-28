@@ -13,11 +13,14 @@ namespace TinyBrowser
             var timeServer = new TcpClient("Acme.com", 80);
             Console.WriteLine("Waiting for connection to establish");
             var stream = timeServer.GetStream();
-            var send = "Get http://www.Acme.com HTTP/0.9\r\n\r\n";
+            var send = "GET / HTTP/1.1\r\nHost: acme.com\r\n\r\n";
             stream.Write(Encoding.ASCII.GetBytes(send,0,send.Length));
             var sr = new StreamReader(stream);
             var str = sr.ReadToEnd();
-            Console.WriteLine(str);
+            int startIndex = str.IndexOf("<title>") + 7;
+            
+            var title = str.Substring(startIndex,str.IndexOf("</title>") - startIndex);
+            Console.WriteLine(title);
             timeServer.Close();
             stream.Close();
                 
