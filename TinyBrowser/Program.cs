@@ -1,12 +1,76 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace TinyBrowser
 {
-    class Program
-    {
+    public class HTMLElement {
+
+        public string Content;
+        public Dictionary<string, string> Attributes;
+        public HTMLElement(string HTMLString) {
+            Console.WriteLine(HTMLString);
+            Content = HTMLString.Substring(HTMLString.IndexOf('>'), HTMLString.LastIndexOf('<') - HTMLString.IndexOf('>'));
+            //Console.WriteLine(HTMLString);
+            foreach (string word in HTMLString.Split(' ')) {
+                if (word.Contains('=')) {
+                    string key = word.Substring(0, word.IndexOf('='));
+                    string value = word.Substring(word.IndexOf('='), word.Length - word.IndexOf('=') - 1);
+                    //Console.WriteLine($"{key} {value}");
+                    //Attributes.Add(key,value);
+                }
+            }
+        }
+        
+    }
+
+    public static class HtmlParser {
+        public static List<HTMLElement> getHTMLElements(string HtmlText) {
+
+            List<HTMLElement> HTMLElements = new List<HTMLElement>();
+            List<string> htmlTags = new List<string>{"<a","<h2"};
+            
+            
+            foreach (var tag in htmlTags) {
+                int i = 0;
+                int i2 = 0;
+                
+                i = HtmlText.IndexOf(tag, StringComparison.Ordinal);
+                i2 = HtmlText.IndexOf(tag.Insert(1,"/"), StringComparison.Ordinal) + tag.Length + 2;
+
+                while (i != -1) {
+                    //Console.WriteLine(tag);
+                
+                    
+                    //Console.WriteLine(i);
+                   // Console.WriteLine(i2);
+                    HTMLElements.Add(new HTMLElement(HtmlText.Substring(i, i2 - i)));
+                    HtmlText = HtmlText.Remove(i, i2 - i);
+                    i = HtmlText.IndexOf(tag, StringComparison.Ordinal);
+                    i2 = HtmlText.IndexOf(tag.Insert(1,"/"), StringComparison.Ordinal) + tag.Length + 2;
+                }    
+                   //string text = HtmlText.Remove(i, i2 - i);
+                   
+                
+                
+                
+
+                
+            }
+            return HTMLElements;
+        }
+        
+    }
+    
+    
+    class Program {
+
+        
+        
         static void Main(string[] args) {
             
             
@@ -16,15 +80,25 @@ namespace TinyBrowser
             var send = "GET / HTTP/1.1\r\nHost: acme.com\r\n\r\n";
             stream.Write(Encoding.ASCII.GetBytes(send,0,send.Length));
             var sr = new StreamReader(stream);
-            var str = sr.ReadToEnd();
-            int startIndex = str.IndexOf("<title>") + 7;
             
-            var title = str.Substring(startIndex,str.IndexOf("</title>") - startIndex);
-            Console.WriteLine(title);
+            var str = sr.ReadToEnd();
+            
+            List<HTMLElement> HTMLELements = HtmlParser.getHTMLElements(str);
+
+            foreach (var htmlElement in HTMLELements) {
+                Console.WriteLine(htmlElement.Content);
+            }
+
+            
+            
+            
+            
             timeServer.Close();
             stream.Close();
                 
             
         }
+        
+        
     }
 }
