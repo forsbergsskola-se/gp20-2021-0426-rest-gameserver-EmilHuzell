@@ -13,8 +13,8 @@ namespace TinyBrowser
         public string Content;
         public Dictionary<string, string> Attributes;
         public HTMLElement(string HTMLString) {
-            Console.WriteLine(HTMLString);
-            Content = HTMLString.Substring(HTMLString.IndexOf('>'), HTMLString.LastIndexOf('<') - HTMLString.IndexOf('>'));
+            //Console.WriteLine(HTMLString);
+            Content = HTMLString.Substring(HTMLString.IndexOf('>') + 1, HTMLString.LastIndexOf('<') - HTMLString.IndexOf('>') - 1);
             //Console.WriteLine(HTMLString);
             foreach (string word in HTMLString.Split(' ')) {
                 if (word.Contains('=')) {
