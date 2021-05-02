@@ -14,25 +14,33 @@ namespace TinyBrowser
         public Dictionary<string, string> Attributes;
         public HTMLElement(string HTMLString) {
             //Console.WriteLine(HTMLString);
+            Attributes = new Dictionary<string, string>();
+                
             Content = HTMLString.Substring(HTMLString.IndexOf('>') + 1, HTMLString.LastIndexOf('<') - HTMLString.IndexOf('>') - 1);
             //Console.WriteLine(HTMLString);
             foreach (string word in HTMLString.Split(' ')) {
                 if (word.Contains('=')) {
-                    string key = word.Substring(0, word.IndexOf('='));
-                    string value = word.Substring(word.IndexOf('='), word.Length - word.IndexOf('=') - 1);
-                    //Console.WriteLine($"{key} {value}");
-                    //Attributes.Add(key,value);
+                    try {
+                        string key = word.Substring(0, word.IndexOf('='));
+                        string value = word.Substring(word.IndexOf('"') + 1, word.LastIndexOf('"') - word.IndexOf('"') - 1);
+                        Attributes.Add(key, value);
+
+                    }
+                    catch{
+                        
+                    }
+                        
+                    
                 }
             }
+            
         }
-        
     }
-
     public static class HtmlParser {
         public static List<HTMLElement> getHTMLElements(string HtmlText) {
 
             List<HTMLElement> HTMLElements = new List<HTMLElement>();
-            List<string> htmlTags = new List<string>{"<a","<h2"};
+            List<string> htmlTags = new List<string>{"<title","<a"};
             
             
             foreach (var tag in htmlTags) {
@@ -54,12 +62,7 @@ namespace TinyBrowser
                     i2 = HtmlText.IndexOf(tag.Insert(1,"/"), StringComparison.Ordinal) + tag.Length + 2;
                 }    
                    //string text = HtmlText.Remove(i, i2 - i);
-                   
-                
-                
-                
 
-                
             }
             return HTMLElements;
         }
@@ -85,14 +88,23 @@ namespace TinyBrowser
             
             List<HTMLElement> HTMLELements = HtmlParser.getHTMLElements(str);
 
+
+            int index = 0;
+            Console.WriteLine(String.Empty);
             foreach (var htmlElement in HTMLELements) {
-                Console.WriteLine(htmlElement.Content);
+                
+                if (htmlElement.Attributes.ContainsKey("href")) 
+                {
+                    Console.WriteLine($"{index} {htmlElement.Content}");
+                    index++;
+                }
+                else {
+                    Console.WriteLine(htmlElement.Content);
+                    Console.WriteLine(String.Empty);
+                }
+                
             }
 
-            
-            
-            
-            
             timeServer.Close();
             stream.Close();
                 
