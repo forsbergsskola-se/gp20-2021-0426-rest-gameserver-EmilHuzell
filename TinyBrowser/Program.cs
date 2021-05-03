@@ -37,6 +37,23 @@ namespace TinyBrowser
         }
     }
     public static class HtmlParser {
+        
+        public static string getHtml(string link) {
+            var timeServer = new TcpClient("Acme.com", 80);
+            Console.WriteLine("Waiting for connection to establish");
+            var stream = timeServer.GetStream();
+            var send = $"GET / HTTP/1.1\r\nHost: {link}\r\n\r\n";
+            stream.Write(Encoding.ASCII.GetBytes(send,0,send.Length));
+            var sr = new StreamReader(stream);
+            var str = sr.ReadToEnd();
+            
+            timeServer.Close();
+            stream.Close();
+
+            return str;
+
+        }
+        
         public static List<HTMLElement> getHTMLElements(string HtmlText) {
 
             List<HTMLElement> HTMLElements = new List<HTMLElement>();
@@ -72,41 +89,48 @@ namespace TinyBrowser
     
     class Program {
 
+
         
+
         
         static void Main(string[] args) {
-            
-            
-            var timeServer = new TcpClient("Acme.com", 80);
-            Console.WriteLine("Waiting for connection to establish");
-            var stream = timeServer.GetStream();
-            var send = "GET / HTTP/1.1\r\nHost: acme.com\r\n\r\n";
-            stream.Write(Encoding.ASCII.GetBytes(send,0,send.Length));
-            var sr = new StreamReader(stream);
-            
-            var str = sr.ReadToEnd();
-            
-            List<HTMLElement> HTMLELements = HtmlParser.getHTMLElements(str);
 
 
-            int index = 0;
-            Console.WriteLine(String.Empty);
-            foreach (var htmlElement in HTMLELements) {
+
+
+
+
+
+            string link = "Acme.com";
+            
+            while (true) {
+                string html = HtmlParser.getHtml(link);
+                List<HTMLElement> HTMLELements = HtmlParser.getHTMLElements(html);
+                int index = 0;
+                Console.WriteLine(String.Empty);
+                foreach (var htmlElement in HTMLELements) {
                 
-                if (htmlElement.Attributes.ContainsKey("href")) 
-                {
-                    Console.WriteLine($"{index} {htmlElement.Content}");
-                    index++;
-                }
-                else {
-                    Console.WriteLine(htmlElement.Content);
-                    Console.WriteLine(String.Empty);
-                }
-                
+                    if (htmlElement.Attributes.ContainsKey("href")) 
+                    {
+                        Console.WriteLine($"{index} {htmlElement.Content}");
+                        index++;
+                    }
+                    else {
+                        Console.WriteLine(htmlElement.Content);
+                        Console.WriteLine(String.Empty);
+                    }
+                } 
+                Console.WriteLine(String.Empty);
+                Console.WriteLine("chose an index for where you want to go");
+                int response = int.Parse(Console.ReadLine());
+                link = HTMLELements[response].Attributes["href"];
+
             }
+            
 
-            timeServer.Close();
-            stream.Close();
+            
+            
+            
                 
             
         }
