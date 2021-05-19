@@ -13,31 +13,23 @@ namespace TinyBrowser
         public string Content;
         public Dictionary<string, string> Attributes;
         public HTMLElement(string HTMLString) {
-            //Console.WriteLine(HTMLString);
             Attributes = new Dictionary<string, string>();
-                
             Content = HTMLString.Substring(HTMLString.IndexOf('>') + 1, HTMLString.LastIndexOf('<') - HTMLString.IndexOf('>') - 1);
-            //Console.WriteLine(HTMLString);
+
             foreach (string word in HTMLString.Split(' ')) {
                 if (word.Contains('=')) {
                     try {
                         string key = word.Substring(0, word.IndexOf('='));
                         string value = word.Substring(word.IndexOf('"') + 1, word.LastIndexOf('"') - word.IndexOf('"') - 1);
                         Attributes.Add(key, value);
-
                     }
                     catch{
-                        
                     }
-                        
-                    
                 }
             }
-            
         }
     }
-    public static class HtmlParser {
-        
+    public class HtmlParser {
         public static string getHtml(string link) {
             var timeServer = new TcpClient("Acme.com", 80);
             Console.WriteLine("Waiting for connection to establish");
@@ -51,14 +43,11 @@ namespace TinyBrowser
             stream.Close();
 
             return str;
-
         }
-        
         public static List<HTMLElement> getHTMLElements(string HtmlText) {
 
             List<HTMLElement> HTMLElements = new List<HTMLElement>();
             List<string> htmlTags = new List<string>{"<title","<a"};
-            
             
             foreach (var tag in htmlTags) {
                 int i = 0;
@@ -68,38 +57,19 @@ namespace TinyBrowser
                 i2 = HtmlText.IndexOf(tag.Insert(1,"/"), StringComparison.Ordinal) + tag.Length + 2;
 
                 while (i != -1) {
-                    //Console.WriteLine(tag);
-                
-                    
-                    //Console.WriteLine(i);
-                   // Console.WriteLine(i2);
                     HTMLElements.Add(new HTMLElement(HtmlText.Substring(i, i2 - i)));
                     HtmlText = HtmlText.Remove(i, i2 - i);
                     i = HtmlText.IndexOf(tag, StringComparison.Ordinal);
                     i2 = HtmlText.IndexOf(tag.Insert(1,"/"), StringComparison.Ordinal) + tag.Length + 2;
-                }    
-                   //string text = HtmlText.Remove(i, i2 - i);
-
+                }
             }
             return HTMLElements;
         }
-        
     }
-    
-    
     class Program {
-
-
-        
-
-        
         static void Main(string[] args) {
 
-
-
-
-
-
+            Stack<string> history = new Stack<string>();
 
             string link = "Acme.com";
             
@@ -112,7 +82,7 @@ namespace TinyBrowser
                 
                     if (htmlElement.Attributes.ContainsKey("href")) 
                     {
-                        Console.WriteLine($"{index} {htmlElement.Content}");
+                        Console.WriteLine($"{index}: {htmlElement.Content} {htmlElement.Attributes["href"]}");
                         index++;
                     }
                     else {
@@ -122,19 +92,12 @@ namespace TinyBrowser
                 } 
                 Console.WriteLine(String.Empty);
                 Console.WriteLine("chose an index for where you want to go");
-                int response = int.Parse(Console.ReadLine());
-                link = HTMLELements[response].Attributes["href"];
-
-            }
-            
-
-            
-            
-            
                 
-            
+                int response = int.Parse(Console.ReadLine());
+                history.Push(link);
+                link = HTMLELements[response + 1].Attributes["href"];
+                Console.WriteLine(link);
+            }
         }
-        
-        
     }
 }
