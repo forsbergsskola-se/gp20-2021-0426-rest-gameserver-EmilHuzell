@@ -21,7 +21,7 @@ namespace TinyBrowser
                 if (word.Contains('=')) {
                     try {
                         string key = word.Substring(0, word.IndexOf('='));
-                        string value = word.Substring(word.IndexOf('"') + 1, word.LastIndexOf('"') - word.IndexOf('"') - 1);
+                        string value = word.Substring(word.IndexOf('"') + 1 , word.LastIndexOf('"') - word.IndexOf('"') - 1);
                         Attributes.Add(key, value);
                     }
                     catch{
@@ -35,7 +35,8 @@ namespace TinyBrowser
             var timeServer = new TcpClient("Acme.com", 80);
             Console.WriteLine("Waiting for connection to establish");
             var stream = timeServer.GetStream();
-            var send = $"GET / HTTP/1.1\r\nHost: Acme.com{link}\r\n\r\n";
+            Console.WriteLine($"Acme.com{link}");
+            var send = $"GET /{link} HTTP/1.1\r\nHost: Acme.com\r\n\r\n";
             stream.Write(Encoding.ASCII.GetBytes(send,0,send.Length));
             var streamReader = new StreamReader(stream);
             
