@@ -68,6 +68,41 @@ namespace LameScooter
             throw new NotFoundException($"{stationName} could not be found");
         }
     }
+
+    public class RealTimeLameScooterRental : ILameScooterRental {
+        public Task<int> GetScooterCountInStation(string stationName) {
+            var jsonText = getOnlineJsonText().Result;
+            Console.WriteLine(jsonText);
+            var stations = JsonSerializer.Deserialize<Stations>(jsonText);
+            List<Station> LameScooterStationList = new List<Station>();
+
+            //Console.WriteLine(stations.stations[0]);
+            foreach (var jsonElement in stations.stations) {
+                var stationInstance = JsonSerializer.Deserialize<Station>(jsonElement.ToString());
+                LameScooterStationList.Add(stationInstance);
+            }
+            foreach (var scooterStation in LameScooterStationList) {
+                if (scooterStation.name == stationName) {
+                    return Task.FromResult(scooterStation.bikesAvailable);
+                }
+            }
+
+            throw new NotFoundException($"{stationName} could not be found");
+            
+        }
+
+        public async Task<string> getOnlineJsonText() {
+            var client = new HttpClient();
+            
+            
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri("https://raw.githubusercontent.com/marczaku/GP20-2021-0426-Rest-Gameserver/main/assignments/scooters.json"));
+                
+
+            var response = client.Send(request);
+            var jsonText = await response.Content.ReadAsStringAsync();
+            return jsonText;
+        }
+    }
     
     class NotFoundException : Exception
     {
@@ -97,6 +132,9 @@ namespace LameScooter
             }
             else if (args[1] == "offline") {
                 ScooterStations = new OfflineLameScooterRental();
+            }
+            else if(args[1] == "realtime") {
+                ScooterStations = new RealTimeLameScooterRental();
             }
             else {
                 throw new ArgumentException(" invalid second argument");
