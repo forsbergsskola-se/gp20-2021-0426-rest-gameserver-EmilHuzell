@@ -90,7 +90,19 @@ namespace LameScooter
                 throw new ArgumentException(" argument string can not contain digits");
             }
 
-            var ScooterStations = new DeprecatedLameScooterRental();
+            ILameScooterRental ScooterStations;
+
+            if (args[1] == "deprecated") {
+                ScooterStations = new DeprecatedLameScooterRental();
+            }
+            else if (args[1] == "offline") {
+                ScooterStations = new OfflineLameScooterRental();
+            }
+            else {
+                throw new ArgumentException(" invalid second argument");
+            }
+
+            
             var amount = await ScooterStations.GetScooterCountInStation(args[0]);
             
             
