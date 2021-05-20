@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Text.Json;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace LameScooter
 {
+    
     public class Stations {
         public JsonElement[] stations{get;set;}
     }
@@ -19,52 +21,39 @@ namespace LameScooter
     {
         Task<int> GetScooterCountInStation(string stationName);
     }
-
-    public class LameScooterRental : ILameScooterRental {
-        Dictionary<string, int> Stations = new Dictionary<string, int>();
-        public LameScooterRental(List<Station> stations) {
-           foreach (var station in stations) {
-                Stations.Add(jsonElement.GetProperty("name").ToString(),jsonElement.GetProperty("bikesAvailable"));
-            }
-        }
+    public class OfflineLameScooterRental : ILameScooterRental {
 
         public Task<int> GetScooterCountInStation(string stationName) {
-            throw new NotImplementedException();
-        }
-    }
-    class Program
-    {
-        static async Task Main(string[] args)
-        {
-            var client = new HttpClient();
             
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri("https://raw.githubusercontent.com/marczaku/GP20-2021-0426-Rest-Gameserver/main/assignments/scooters.json"));
-                
-
-            var response = client.Send(request);
-            string jsonText =  await response.Content.ReadAsStringAsync();
-
-           // ILameScooterRental rental = new LameScooterRental();
-            
+            var jsonText = File.ReadAllText("scooters.json");
             var stations = JsonSerializer.Deserialize<Stations>(jsonText);
+            List<Station> LameScooterStationList = new List<Station>();
 
             //Console.WriteLine(stations.stations[0]);
-            var stationer = new List<Station>();
             foreach (var jsonElement in stations.stations) {
-                var stationen = JsonSerializer.Deserialize<Station>(jsonElement.ToString());
-                stationer.Add(stationen);
+                var stationInstance = JsonSerializer.Deserialize<Station>(jsonElement.ToString());
+                LameScooterStationList.Add(stationInstance);
+            }
+            foreach (var scooterStation in LameScooterStationList) {
+                if (scooterStation.name == stationName) {
+                    return Task.FromResult(scooterStation.bikesAvailable);
+                }
             }
 
-            foreach (var station in stationer) {
-                Console.WriteLine($"availableBikes: {station.bikesAvailable} name {station.name}");
-            }
+            return Task.FromResult(2);
+        }
+    }
+    
+    class Program
+    {
+        static async Task Main(string[] args) {
+            var ScooterStations = new OfflineLameScooterRental();
+            var amount = await ScooterStations.GetScooterCountInStation(args[0]);
             
-            
-            // Replace with new XXX() later.
             // The await keyword makes sure that we wait for the Task to complete.
             // and makes the result of the task available. Task<int> => int.
             //var count = await rental.GetScooterCountInStation(null); // Replace with command line argument.
-            Console.WriteLine("Number of Scooters Available at this Station: "); // Add the count that is returned above to the output.
+            Console.WriteLine($"Number of Scooters Available at this Station: {amount}"); // Add the count that is returned above to the output.
 
 
             
