@@ -72,7 +72,6 @@ namespace LameScooter
     public class RealTimeLameScooterRental : ILameScooterRental {
         public Task<int> GetScooterCountInStation(string stationName) {
             var jsonText = getOnlineJsonText().Result;
-            Console.WriteLine(jsonText);
             var stations = JsonSerializer.Deserialize<Stations>(jsonText);
             List<Station> LameScooterStationList = new List<Station>();
 

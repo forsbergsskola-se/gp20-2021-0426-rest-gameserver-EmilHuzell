@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -34,17 +35,18 @@ namespace TinyBrowser
             var timeServer = new TcpClient("Acme.com", 80);
             Console.WriteLine("Waiting for connection to establish");
             var stream = timeServer.GetStream();
-            var send = $"GET / HTTP/1.1\r\nHost: {link}\r\n\r\n";
+            var send = $"GET / HTTP/1.1\r\nHost: Acme.com{link}\r\n\r\n";
             stream.Write(Encoding.ASCII.GetBytes(send,0,send.Length));
-            var sr = new StreamReader(stream);
-            var str = sr.ReadToEnd();
+            var streamReader = new StreamReader(stream);
+            
+            var html = streamReader.ReadToEnd();
             
             timeServer.Close();
             stream.Close();
 
-            return str;
+            return html;
         }
-        public static List<HTMLElement> getHTMLElements(string HtmlText) {
+        public static List<HTMLElement> extractHTMLElements(string HtmlText) {
 
             List<HTMLElement> HTMLElements = new List<HTMLElement>();
             List<string> htmlTags = new List<string>{"<title","<a"};
@@ -71,11 +73,13 @@ namespace TinyBrowser
 
             Stack<string> history = new Stack<string>();
 
-            string link = "Acme.com";
+            string link = String.Empty;
             
             while (true) {
                 string html = HtmlParser.getHtml(link);
-                List<HTMLElement> HTMLELements = HtmlParser.getHTMLElements(html);
+                
+                
+                List<HTMLElement> HTMLELements = HtmlParser.extractHTMLElements(html);
                 int index = 0;
                 Console.WriteLine(String.Empty);
                 foreach (var htmlElement in HTMLELements) {
@@ -93,9 +97,17 @@ namespace TinyBrowser
                 Console.WriteLine(String.Empty);
                 Console.WriteLine("chose an index for where you want to go");
                 
-                int response = int.Parse(Console.ReadLine());
-                history.Push(link);
-                link = HTMLELements[response + 1].Attributes["href"];
+                var response = Console.ReadLine();
+
+                if (response.Any(char.IsDigit)) {
+                    history.Push(link);
+                    link = HTMLELements[int.Parse(response) + 1].Attributes["href"];
+                }
+                else if (response == "b") {
+                    link = history.Pop();
+                }
+                
+                
                 Console.WriteLine(link);
             }
         }
