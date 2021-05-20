@@ -23,7 +23,6 @@ namespace LameScooter
         Task<int> GetScooterCountInStation(string stationName);
     }
     public class OfflineLameScooterRental : ILameScooterRental {
-
         public Task<int> GetScooterCountInStation(string stationName) {
             
             var jsonText = File.ReadAllText("scooters.json");
@@ -33,6 +32,31 @@ namespace LameScooter
             //Console.WriteLine(stations.stations[0]);
             foreach (var jsonElement in stations.stations) {
                 var stationInstance = JsonSerializer.Deserialize<Station>(jsonElement.ToString());
+                LameScooterStationList.Add(stationInstance);
+            }
+            foreach (var scooterStation in LameScooterStationList) {
+                if (scooterStation.name == stationName) {
+                    return Task.FromResult(scooterStation.bikesAvailable);
+                }
+            }
+
+            throw new NotFoundException($"{stationName} could not be found");
+        }
+    }
+
+    public class DeprecatedLameScooterRental : ILameScooterRental {
+        public Task<int> GetScooterCountInStation(string stationName) {
+            
+            var text = File.ReadAllText("scooters.txt").TrimEnd( '\r', '\n' );
+            
+            string[] stations = text.Split(Environment.NewLine);
+            
+            List<Station> LameScooterStationList = new List<Station>();
+            
+            foreach (var station in stations) {
+                var stationInstance = new Station();
+                stationInstance.name = station.Substring(0, station.IndexOf(':') - 1);
+                stationInstance.bikesAvailable = int.Parse(station.Substring(station.IndexOf(':') + 1));
                 LameScooterStationList.Add(stationInstance);
             }
             foreach (var scooterStation in LameScooterStationList) {
@@ -65,8 +89,8 @@ namespace LameScooter
             if (args[0].Any(char.IsDigit)) {
                 throw new ArgumentException(" argument string can not contain digits");
             }
-                
-            var ScooterStations = new OfflineLameScooterRental();
+
+            var ScooterStations = new DeprecatedLameScooterRental();
             var amount = await ScooterStations.GetScooterCountInStation(args[0]);
             
             
