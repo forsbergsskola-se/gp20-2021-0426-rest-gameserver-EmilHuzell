@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.IO;
+using System.Linq;
 
 namespace LameScooter
 {
@@ -40,19 +41,35 @@ namespace LameScooter
                 }
             }
 
-            return Task.FromResult(2);
+            throw new NotFoundException($"{stationName} could not be found");
         }
+    }
+    
+    class NotFoundException : Exception
+    {
+        public NotFoundException()
+        {
+
+        }
+
+        public NotFoundException(string name) : base(name) {
+            Console.WriteLine("Station could not be found");
+        }
+  
     }
     
     class Program
     {
         static async Task Main(string[] args) {
+
+            if (args[0].Any(char.IsDigit)) {
+                throw new ArgumentException(" argument string can not contain digits");
+            }
+                
             var ScooterStations = new OfflineLameScooterRental();
             var amount = await ScooterStations.GetScooterCountInStation(args[0]);
             
-            // The await keyword makes sure that we wait for the Task to complete.
-            // and makes the result of the task available. Task<int> => int.
-            //var count = await rental.GetScooterCountInStation(null); // Replace with command line argument.
+            
             Console.WriteLine($"Number of Scooters Available at this Station: {amount}"); // Add the count that is returned above to the output.
 
 
