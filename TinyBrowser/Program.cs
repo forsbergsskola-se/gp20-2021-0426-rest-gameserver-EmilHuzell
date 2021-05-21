@@ -95,17 +95,31 @@ namespace TinyBrowser
             return HTMLElements;
         }
     }
+    struct historyInstance
+    {
+        public string url;
+        public string time;
+        public historyInstance(string url, string time)
+        {
+            this.url = url;
+            this.time = time;
+        }
+    }
     class Program {
+        
         static void Main(string[] args) {
 
             Stack<string> history = new Stack<string>();
+
+
+            List<historyInstance> historyLog = new List<historyInstance>();
 
             string URL = String.Empty;
             
             
             while (true) {
                 string html = HtmlParser.getHtml(URL);
-                
+                historyLog.Add(new historyInstance("Acme.com/" + URL, DateTime.Now.ToString()));
                 List<HTMLElement> HTMLELements = HtmlParser.extractHTMLElements(html);
                 int index = 0;
                 Console.WriteLine(String.Empty);
@@ -121,9 +135,19 @@ namespace TinyBrowser
                     }
                 } 
                 Console.WriteLine(String.Empty);
-                Console.WriteLine("Enter an index for where you want to go, enter b to go back, enter h to view history or enter any other key to refresh");
+                Console.WriteLine("Enter an index for where you want to go, enter b to go back, enter h to view history, enter r to refresh, enter any other key to close the browser");
                 
                 var response = Console.ReadLine();
+
+                if (response == "h") {
+                    foreach (var historyInstance in historyLog) {
+                        Console.WriteLine($"{historyInstance.url} {historyInstance.time}");
+                    }
+                    Console.WriteLine(String.Empty);
+                    Console.WriteLine("Enter an index for where you want to go, enter b to go back, enter r to refresh, enter any other key to close the browser");
+                
+                    response = Console.ReadLine();
+                }
 
                 if (response.Any(char.IsDigit)) {
                     history.Push(URL);
@@ -132,10 +156,11 @@ namespace TinyBrowser
                 else if (response == "b" && history.Count > 0) {
                     URL = history.Pop();
                 }
-                else if (response == "h" && history.Count > 0) {
-                    foreach (var path in history) {
-                        Console.WriteLine(path);
-                    }
+                else if (response == "r") {
+                    continue;
+                }
+                else {
+                    break;
                 }
                 
             }
