@@ -17,10 +17,6 @@ namespace TinyBrowser
         public HTMLElement(string HTMLString) {
             Attributes = new Dictionary<string, string>();
             
-            
-            
-            
-
             foreach (string word in HTMLString.Split(' ')) {
                 if (word.Contains('=')) {
                     try {
@@ -41,17 +37,29 @@ namespace TinyBrowser
         }
     }
     public class HtmlParser {
-        public static string getHtml(string link) {
-            var timeServer = new TcpClient("Acme.com", 80);
+        public static string getHtml(string URL) {
+            
+
+            string host = "Acme.com";
+            string path = URL;
+
+            if (URL.Contains(".com")) {
+                host = URL.Substring(URL.IndexOf('w'), URL.IndexOf(".com") + 4 - URL.IndexOf('w'));
+                path = URL.Substring(URL.IndexOf(".com") + 4);
+            }
+            Console.WriteLine($"{host} {path}");
+            
+            var timeServer = new TcpClient(host, 80);
             Console.WriteLine("Waiting for connection to establish");
             var stream = timeServer.GetStream();
-            //Console.WriteLine($"Acme.com{link}");
-            var send = $"GET /{link} HTTP/1.1\r\nHost: Acme.com\r\n\r\n";
+            
+            
+            var send = $"GET /{path} HTTP/1.1\r\nHost: {host}\r\n\r\n";
             stream.Write(Encoding.ASCII.GetBytes(send,0,send.Length));
             var streamReader = new StreamReader(stream);
             
             var html = streamReader.ReadToEnd();
-            
+            Console.WriteLine("hej");
             timeServer.Close();
             stream.Close();
 
@@ -70,7 +78,12 @@ namespace TinyBrowser
                 i2 = HtmlText.IndexOf(tag.Insert(1,"/"), StringComparison.Ordinal) + tag.Length + 2;
 
                 while (i != -1) {
-                    HTMLElements.Add(new HTMLElement(HtmlText.Substring(i, i2 - i)));
+                    string htmlString = HtmlText.Substring(i, i2 - i);
+
+                    if (!htmlString.Contains("<img")) {
+                        HTMLElements.Add(new HTMLElement(htmlString));
+                    }
+                    
                     HtmlText = HtmlText.Remove(i, i2 - i);
                     i = HtmlText.IndexOf(tag, StringComparison.Ordinal);
                     i2 = HtmlText.IndexOf(tag.Insert(1,"/"), StringComparison.Ordinal) + tag.Length + 2;
@@ -84,17 +97,16 @@ namespace TinyBrowser
 
             Stack<string> history = new Stack<string>();
 
-            string link = String.Empty;
+            string URL = String.Empty;
+            
             
             while (true) {
-                string html = HtmlParser.getHtml(link);
-                
+                string html = HtmlParser.getHtml(URL);
                 
                 List<HTMLElement> HTMLELements = HtmlParser.extractHTMLElements(html);
                 int index = 0;
                 Console.WriteLine(String.Empty);
                 foreach (var htmlElement in HTMLELements) {
-                
                     if (htmlElement.Attributes.ContainsKey("href")) 
                     {
                         Console.WriteLine($"{index}: {htmlElement.Content} ({htmlElement.Attributes["href"]})");
@@ -106,20 +118,24 @@ namespace TinyBrowser
                     }
                 } 
                 Console.WriteLine(String.Empty);
-                Console.WriteLine("Enter an index for where you want to go, enter b to go back or any other key to refresh");
+                Console.WriteLine("Enter an index for where you want to go, enter b to go back, enter h to view history or enter any other key to refresh");
                 
                 var response = Console.ReadLine();
 
                 if (response.Any(char.IsDigit)) {
-                    history.Push(link);
-                    link = HTMLELements[int.Parse(response) + 1].Attributes["href"];
+                    history.Push(URL);
+                    URL = HTMLELements[int.Parse(response) + 1].Attributes["href"];
                 }
                 else if (response == "b" && history.Count > 0) {
-                    link = history.Pop();
+                    URL = history.Pop();
+                }
+                else if (response == "h" && history.Count > 0) {
+                    foreach (var path in history) {
+                        Console.WriteLine(path);
+                    }
                 }
                 
-                
-                Console.WriteLine(link);
+                Console.WriteLine(URL);
             }
         }
     }
