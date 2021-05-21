@@ -33,6 +33,10 @@ namespace TinyBrowser
                 // - HTMLString.IndexOf('>') - 1
                 HTMLString = HTMLString.Substring(HTMLString.IndexOf('>') + 1, HTMLString.LastIndexOf('<') - HTMLString.IndexOf('>') - 1);
             }
+
+            if (HTMLString.Length > 15) {
+                HTMLString = $"{HTMLString.Substring(0, 6)}...{HTMLString.Substring(HTMLString.Length - 6)}";
+            }
             Content = HTMLString;
         }
     }
@@ -47,10 +51,10 @@ namespace TinyBrowser
                 host = URL.Substring(URL.IndexOf('w'), URL.IndexOf(".com") + 4 - URL.IndexOf('w'));
                 path = URL.Substring(URL.IndexOf(".com") + 4);
             }
-            Console.WriteLine($"{host} {path}");
+            
             
             var timeServer = new TcpClient(host, 80);
-            Console.WriteLine("Waiting for connection to establish");
+            
             var stream = timeServer.GetStream();
             
             
@@ -59,7 +63,6 @@ namespace TinyBrowser
             var streamReader = new StreamReader(stream);
             
             var html = streamReader.ReadToEnd();
-            Console.WriteLine("hej");
             timeServer.Close();
             stream.Close();
 
@@ -135,7 +138,6 @@ namespace TinyBrowser
                     }
                 }
                 
-                Console.WriteLine(URL);
             }
         }
     }
