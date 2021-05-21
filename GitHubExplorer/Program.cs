@@ -14,11 +14,15 @@ namespace GitHubExplorer
         public string company { get; set;}
         public string organizations_url { get; set;}
     }
+    public class OrgaizationResponse {
+        
+        public string description { get; set; }
+    }
 
     
     class Program
     {
-        private static string token = "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";
+        private static string token = "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";
         static async Task Main(string[] args) {
             //e
             var client = new HttpClient();
@@ -33,6 +37,7 @@ namespace GitHubExplorer
                 Console.WriteLine("Submit a username you'd like to explore");
             
                 string username = Console.ReadLine();
+                Console.WriteLine(String.Empty);
                 
 
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri($"https://api.github.com/users/{username}"));
@@ -44,25 +49,18 @@ namespace GitHubExplorer
                 //Console.WriteLine(contents);
 
                 var profile = JsonSerializer.Deserialize<UserResponse>(contents);
-                PropertyInfo[] props = Type.GetType("GitHubExplorer.UserResponse").GetProperties();
+                //Console.WriteLine(profile.name);
                 
+                PropertyInfo[] props = Type.GetType("GitHubExplorer.UserResponse").GetProperties();
+
+                //string organizationLink;
 
                 foreach (PropertyInfo property in props) {
                     if (property.GetValue(profile) == null) {
                         continue;
                     }
-                   
-                    Console.WriteLine($"{property.Name} {property.GetValue(profile)}");
-                    Console.WriteLine();
-                    
+                    Console.WriteLine($"{property.Name}: {property.GetValue(profile)}");
                 }
-                //cd Documents\GitHub\gp20-2021-0426-rest-gameserver-EmilHuzell\GitHubExplorer
-                
-                //Console.WriteLine(String.Empty);
-                //Console.WriteLine("Name: " + user["location"]);
-                //Console.WriteLine("Location: " + profile.location);
-                //Console.WriteLine($"{profile.organizations_url}");
-                
             }
         }
     }
