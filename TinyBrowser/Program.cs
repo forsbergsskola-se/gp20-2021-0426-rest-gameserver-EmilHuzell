@@ -9,13 +9,17 @@ using System.Text.RegularExpressions;
 
 namespace TinyBrowser
 {
+    //cd Documents\GitHub\gp20-2021-0426-rest-gameserver-EmilHuzell\TinyBrowser
     public class HTMLElement {
 
         public string Content;
         public Dictionary<string, string> Attributes;
         public HTMLElement(string HTMLString) {
             Attributes = new Dictionary<string, string>();
-            Content = HTMLString.Substring(HTMLString.IndexOf('>') + 1, HTMLString.LastIndexOf('<') - HTMLString.IndexOf('>') - 1);
+            
+            
+            
+            
 
             foreach (string word in HTMLString.Split(' ')) {
                 if (word.Contains('=')) {
@@ -28,6 +32,12 @@ namespace TinyBrowser
                     }
                 }
             }
+            while (HTMLString.IndexOf('>') != -1 && HTMLString.LastIndexOf('<') > HTMLString.IndexOf('>')) {
+                
+                // - HTMLString.IndexOf('>') - 1
+                HTMLString = HTMLString.Substring(HTMLString.IndexOf('>') + 1, HTMLString.LastIndexOf('<') - HTMLString.IndexOf('>') - 1);
+            }
+            Content = HTMLString;
         }
     }
     public class HtmlParser {
@@ -35,7 +45,7 @@ namespace TinyBrowser
             var timeServer = new TcpClient("Acme.com", 80);
             Console.WriteLine("Waiting for connection to establish");
             var stream = timeServer.GetStream();
-            Console.WriteLine($"Acme.com{link}");
+            //Console.WriteLine($"Acme.com{link}");
             var send = $"GET /{link} HTTP/1.1\r\nHost: Acme.com\r\n\r\n";
             stream.Write(Encoding.ASCII.GetBytes(send,0,send.Length));
             var streamReader = new StreamReader(stream);
@@ -87,7 +97,7 @@ namespace TinyBrowser
                 
                     if (htmlElement.Attributes.ContainsKey("href")) 
                     {
-                        Console.WriteLine($"{index}: {htmlElement.Content} {htmlElement.Attributes["href"]}");
+                        Console.WriteLine($"{index}: {htmlElement.Content} ({htmlElement.Attributes["href"]})");
                         index++;
                     }
                     else {
@@ -96,7 +106,7 @@ namespace TinyBrowser
                     }
                 } 
                 Console.WriteLine(String.Empty);
-                Console.WriteLine("chose an index for where you want to go");
+                Console.WriteLine("Enter an index for where you want to go, enter b to go back or any other key to refresh");
                 
                 var response = Console.ReadLine();
 
@@ -104,7 +114,7 @@ namespace TinyBrowser
                     history.Push(link);
                     link = HTMLELements[int.Parse(response) + 1].Attributes["href"];
                 }
-                else if (response == "b") {
+                else if (response == "b" && history.Count > 0) {
                     link = history.Pop();
                 }
                 
